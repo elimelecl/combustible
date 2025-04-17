@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODIS - Sistema de Ventas y Puntos</title>
+    <style>
+        :root {
+            --primary: #0057b8;
+            --secondary: #00a86b;
+            --accent: #004080;
+            --light: #f0f8ff;
+            --dark: #002b40;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --gray: #6c757d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .login-card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .app-container {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--dark);
+            color: white;
+            padding: 1rem 0;
+            height: 100vh;
+            position: fixed;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+
+        .logo img {
+            width: 80%;
+            height: auto;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .nav-item:hover {
+            background-color: var(--accent);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary);
+            border-left: 4px solid var(--secondary);
+        }
+
+        .section {
+            display: none;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        h1, h2, h3 {
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--accent);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        table th, table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        table th {
+            background-color: var(--light);
+            font-weight: 600;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card h3 {
+            font-size: 1rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border-color: var(--success);
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: var(--danger);
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            border-color: var(--warning);
+            color: #856404;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .search-bar {
+            display: flex;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .search-bar button {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25em 0.6em;
+            font-size: 0.75rem;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.25rem;
+        }
+
+        .badge-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .badge-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .badge-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .customer-profile {
+            padding: 1.5rem;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-right: 1.5rem;
+        }
+
+        .profile-info h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-stat {
+            text-align: center;
+        }
+
+        .profile-stat h3 {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-stat p {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .transaction-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .transaction-date {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: 500;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .panel-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .pagination {
+            display: flex;
+            list-style: none;
+        }
+
+        .pagination li {
+            margin: 0 0.25rem;
+        }
+
+        .pagination button {
+            padding: 0.5rem 0.75rem;
+            background-color: white;
+            border: 1px solid #ddd;
+            color: var(--dark);
+        }
+
+        .pagination button.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                overflow: hidden;
+                transition: width 0.3s;
+            }
+
+            .sidebar.active {
+                width: 250px;
+            }
+
+            .content {
+                margin-left: 0;
+                transition: margin-left 0.3s;
+            }
+
+            .content.sidebar-active {
+                margin-left: 250px;
+            }
+
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-avatar {
+                margin-right: 0;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla de Login -->
+    <div id="login-screen" class="login-container">
+        <div class="login-card">
+            <div class="logo" style="margin-bottom: 2rem;">
+                <!-- Logo placeholder - Replace with actual logo -->
+                <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">CODIS</div>
+            </div>
+            <h2 style="text-align: center; margin-bottom: 2rem;">Sistema de Ventas y Puntos</h2>
+            <div id="login-alert" class="alert alert-danger hide">
+                Credenciales incorrectas. Por favor, inténtalo de nuevo.
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Iniciar Sesión</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Aplicación Principal -->
+    <div id="app-container" class="app-container">
+        <!-- Sidebar / Navegación -->
+        <div class="sidebar">
+            <div class="logo">
+                <!-- Logo placeholder - Replace with actual logo -->
+                <div style="font-size: 2rem; font-weight: bold; color: white;">CODIS</div>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-section="dashboard">Dashboard</li>
+                <li class="nav-item" data-section="sales">Registrar Venta</li>
+                <li class="nav-item" data-section="customers">Consultar Cliente</li>
+                <li class="nav-item" data-section="ranking">Ranking de Puntos</li>
+                <li class="nav-item admin-only" data-section="admin">Administración</li>
+                <li class="nav-item" data-section="logout">Cerrar Sesión</li>
+            </ul>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="content">
+            <header>
+                <h1 id="section-title">Dashboard</h1>
+                <div class="user-info">
+                    <div class="user-avatar" id="user-avatar"></div>
+                    <div>
+                        <div id="user-name">Nombre de Usuario</div>
+                        <div id="user-role" style="font-size: 0.8rem; color: var(--gray);">Rol</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h3>Ventas Hoy</h3>
+                        <p>0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Galones Vendidos (Hoy)</h3>
+                        <p>0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Puntos Otorgados (Hoy)</h3>
+                        <p>0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Clientes Nuevos (Hoy)</h3>
+                        <p>0</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Últimas Ventas</h3>
+                    </div>
+                    <table id="recent-sales">
+                        <thead>
+                            <tr>
+                                <th>Fecha/Hora</th>
+                                <th>Cliente</th>
+                                <th>Combustible</th>
+                                <th>Cantidad</th>
+                                <th>Puntos</th>
+                                <th>Vendedor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="6" style="text-align: center;">No hay ventas recientes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Registrar Venta Section -->
+            <section id="sales" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Registrar Nueva Venta</h3>
+                    </div>
+                    <div id="sale-alert" class="alert hide"></div>
+                    <form id="sale-form">
+                        <div class="form-group">
+                            <label for="customer-id">Cédula/ID del Cliente</label>
+                            <input type="text" id="customer-id" name="customer-id" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-name">Nombre del Cliente</label>
+                            <input type="text" id="customer-name" name="customer-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fuel-type">Tipo de Combustible</label>
+                            <select id="fuel-type" name="fuel-type" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="acpm">ACPM (Diésel)</option>
+                                <option value="corriente">Gasolina Corriente</option>
+                                <option value="extra">Gasolina Extra</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fuel-quantity">Cantidad (Galones)</label>
+                            <input type="number" id="fuel-quantity" name="fuel-quantity" min="0.1" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="sale-date">Fecha y Hora</label>
+                            <input type="datetime-local" id="sale-date" name="sale-date" required>
+                        </div>
+                        <div class="form-group" style="background-color: #f0f8ff; padding: 1rem; border-radius: 4px;">
+                            <label>Puntos a Obtener:</label>
+                            <p id="points-preview" style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">0</p>
+                        </div>
+                        <div class="panel-footer">
+                            <button type="submit" class="btn btn-success">Registrar Venta</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Consultar Cliente Section -->
+            <section id="customers" class="section">
+                <div class="search-bar">
+                    <input type="text" id="customer-search" placeholder="Ingresa cédula/ID del cliente">
+                    <button id="search-btn" class="btn btn-primary">Buscar</button>
+                </div>
+
+                <div id="customer-profile" class="hide">
+                    <div class="customer-profile">
+                        <div class="profile-header">
+                            <div class="profile-avatar" id="customer-avatar">C</div>
+                            <div class="profile-info">
+                                <h2 id="profile-name">Nombre del Cliente</h2>
+                                <p id="profile-id">Cédula/ID: </p>
+                            </div>
+                        </div>
+
+                        <div class="profile-stats">
+                            <div class="profile-stat">
+                                <h3>Puntos Totales</h3>
+                                <p id="customer-total-points">0</p>
+                            </div>
+                            <div class="profile-stat">
+                                <h3>Total Compras</h3>
+                                <p id="customer-total-purchases">0</p>
+                            </div>
+                            <div class="profile-stat">
+                                <h3>Galones Totales</h3>
+                                <p id="customer-total-gallons">0</p>
+                            </div>
+                            <div class="profile-stat">
+                                <h3>Última Compra</h3>
+                                <p id="customer-last-purchase">-</p>
+                            </div>
+                        </div>
+
+                        <div class="tabs">
+                            <div class="tab active" data-tab="transactions">Historial de Compras</div>
+                            <div class="tab" data-tab="points">Historial de Puntos</div>
+                        </div>
+
+                        <div class="tab-content active" id="transactions">
+                            <table id="customer-transactions">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Combustible</th>
+                                        <th>Cantidad</th>
+                                        <th>Puntos</th>
+                                        <th>Vendedor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="5" style="text-align: center;">No hay transacciones registradas</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="tab-content" id="points">
+                            <table id="customer-points-history">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Descripción</th>
+                                        <th>Puntos</th>
+                                        <th>Balance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="4" style="text-align: center;">No hay historial de puntos</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="customer-not-found" class="hide">
+                    <div class="alert alert-warning">
+                        Cliente no encontrado. Por favor verifica la cédula/ID ingresada.
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ranking Section -->
+            <section id="ranking" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Ranking de Clientes por Puntos</h3>
+                    </div>
+                    <table id="customers-ranking">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Cliente</th>
+                                <th>Cédula/ID</th>
+                                <th>Puntos</th>
+                                <th>Galones Totales</th>
+                                <th>Compras</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="6" style="text-align: center;">No hay clientes registrados</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Admin Section -->
+            <section id="admin" class="section">
+                <div class="tabs">
+                    <div class="tab active" data-tab="point-rules">Reglas de Puntos</div>
+                    <div class="tab" data-tab="reports">Reportes</div>
+                    <div class="tab" data-tab="users">Usuarios</div>
+                </div>
+
+                <div class="tab-content active" id="point-rules">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Configuración de Puntos</h3>
+                        </div>
+                        <div id="rules-alert" class="alert hide"></div>
+                        <form id="points-rules-form">
+                            <div class="form-group">
+                                <label for="acpm-points">Puntos por galón de ACPM:</label>
+                                <input type="number" id="acpm-points" name="acpm-points" min="0" step="0.1" value="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="corriente-points">Puntos por galón de Gasolina Corriente:</label>
+                                <input type="number" id="corriente-points" name="corriente-points" min="0" step="0.1" value="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="extra-points">Puntos por galón de Gasolina Extra:</label>
+                                <input type="number" id="extra-points" name="extra-points" min="0" step="0.1" value="1.5" required>
+                            </div>
+                            <div class="panel-footer">
+                                <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="reports">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Reportes</h3>
+                        </div>
+                        <div class="form-group">
+                            <label>Período:</label>
+                            <div style="display: flex; gap: 1rem;">
+                                <input type="date" id="report-start-date" style="width: 50%;">
+                                <input type="date" id="report-end-date" style="width: 50%;">
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                            <button id="generate-report" class="btn btn-primary">Generar Reporte</button>
+                            <button id="export-report" class="btn btn-success">Exportar a Excel</button>
+                        </div>
+
+                        <div id="report-container">
+                            <div class="tabs">
+                                <div class="tab active" data-tab="sales-report">Ventas</div>
+                                <div class="tab" data-tab="points-report">Puntos</div>
+                                <div class="tab" data-tab="customers-report">Clientes</div>
+                            </div>
+
+                            <div class="tab-content active" id="sales-report">
+                                <h4 style="margin: 1rem 0;">Reporte de Ventas</h4>
+                                <table id="sales-report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Cliente</th>
+                                            <th>Cédula/ID</th>
+                                            <th>Combustible</th>
+                                            <th>Cantidad</th>
+                                            <th>Puntos</th>
+                                            <th>Vendedor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="7" style="text-align: center;">Genera un reporte para ver los datos</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="tab-content" id="points-report">
+                                <h4 style="margin: 1rem 0;">Reporte de Puntos</h4>
+                                <table id="points-report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Cédula/ID</th>
+                                            <th>Puntos Acumulados</th>
+                                            <th>Puntos Utilizados</th>
+                                            <th>Balance Actual</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="5" style="text-align: center;">Genera un reporte para ver los datos</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="tab-content" id="customers-report">
+                                <h4 style="margin: 1rem 0;">Reporte de Clientes</h4>
+                                <table id="customers-report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Cédula/ID</th>
+                                            <th>Primera Compra</th>
+                                            <th>Última Compra</th>
+                                            <th>Total Compras</th>
+                                            <th>Galones Totales</th>
+                                            <th>Puntos Actuales</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="7" style="text-align: center;">Genera un reporte para ver los datos</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="users">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Gestión de Usuarios</h3>
+                            <button id="add-user-btn" class="btn btn-success">Nuevo Usuario</button>
+                        </div>
+                        <table id="users-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Usuario</th>
+                                    <th>Rol</th>
+                                    <th>Última Conexión</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">No hay usuarios registrados</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Modal para agregar/editar usuario -->
+                    <div id="user-modal" class="modal hide">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 id="modal-title">Nuevo Usuario</h3>
+                                <span class="close-modal">&times;</span>
+                            </div>
+                            <div id="user-form-alert" class="alert hide"></div>
+                            <form id="user-form">
+                                <div class="form-group">
+                                    <label for="user-name">Nombre Completo</label>
+                                    <input type="text" id="user-name" name="user-name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-username">Usuario</label>
+                                    <input type="text" id="user-username" name="user-username" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-password">Contraseña</label>
+                                    <input type="password" id="user-password" name="user-password">
+                                    <small>Deja en blanco para mantener la contraseña actual</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-role">Rol</label>
+                                    <select id="user-role" name="user-role" required>
+                                        <option value="admin">Administrador</option>
+                                        <option value="seller">Vendedor</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="user-status">Estado</label>
+                                    <select id="user-status" name="user-status" required>
+                                        <option value="active">Activo</option>
+                                        <option value="inactive">Inactivo</option>
+                                    </select>
+                                </div>
+                                <div class="panel-footer">
+                                    <button type="button" class="btn btn-danger close-modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-success">Guardar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <style>
+        /* Estilos adicionales para el modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .close-modal {
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        .hide {
+            display: none;
+        }
+    </style>
+
+    <script>
+        // Datos de ejemplo - En producción, estos datos vendrían de una base de datos
+        const mockData = {
+            users: [
+                { id: 1, name: 'Administrador', username: 'admin', password: 'admin123', role: 'admin', lastLogin: '2025-04-15 09:12:45', status: 'active' },
+                { id: 2, name: 'Juan Vendedor', username: 'juan', password: 'juan123', role: 'seller', lastLogin: '2025-04-15 08:30:10', status: 'active' }
+            ],
+            customers: [
+                { id: '1234567890', name: 'Carlos Rodríguez', points: 520, totalPurchases: 15, totalGallons: 180.5, lastPurchase: '2025-04-15' },
+                { id: '0987654321', name: 'María González', points: 750, totalPurchases: 20, totalGallons: 210.8, lastPurchase: '2025-04-14' }
+            ],
+            sales: [
+                { 
+                    id: 1, 
+                    date: '2025-04-15 10:30:00', 
+                    customerId: '1234567890', 
+                    customerName: 'Carlos Rodríguez', 
+                    fuelType: 'acpm', 
+                    quantity: 10.5, 
+                    points: 10, 
+                    seller: 'Juan Vendedor' 
+                },
+                { 
+                    id: 2, 
+                    date: '2025-04-15 09:15:00', 
+                    customerId: '0987654321', 
+                    customerName: 'María González', 
+                    fuelType: 'extra', 
+                    quantity: 8.2, 
+                    points: 12, 
+                    seller: 'Juan Vendedor' 
+                }
+            ],
+            pointRules: {
+                acpm: 1,
+                corriente: 1,
+                extra: 1.5
+            }
+        };
+
+        // Variables globales
+        let currentUser = null;
+        let currentSection = 'dashboard';
+
+        // DOM Elements
+        const loginScreen = document.getElementById('login-screen');
+        const appContainer = document.getElementById('app-container');
+        const loginForm = document.getElementById('login-form');
+        const loginAlert = document.getElementById('login-alert');
+        const sectionTitle = document.getElementById('section-title');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const userRole = document.getElementById('user-role');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', init);
+        loginForm.addEventListener('submit', handleLogin);
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const section = item.getAttribute('data-section');
+                if (section === 'logout') {
+                    handleLogout();
+                } else {
+                    changeSection(section);
+                }
+            });
+        });
+
+        // Inicialización
+        function init() {
+            // Configurar fecha actual en el formulario de ventas
+            const now = new Date();
+            const dateTimeLocal = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById('sale-date').value = dateTimeLocal;
+
+            // Event listeners para las pestañas
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabContainer = this.closest('.tabs').parentElement;
+                    const tabName = this.getAttribute('data-tab');
+                    
+                    // Desactivar todas las pestañas y contenidos
+                    tabContainer.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tabContainer.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Activar la pestaña y contenido seleccionados
+                    this.classList.add('active');
+                    tabContainer.querySelector(`#${tabName}`).classList.add('active');
+                });
+            });
+
+            // Event listeners para formularios
+            document.getElementById('sale-form').addEventListener('submit', handleSaleSubmit);
+            document.getElementById('points-rules-form').addEventListener('submit', handleRulesSave);
+            document.getElementById('fuel-quantity').addEventListener('input', updatePointsPreview);
+            document.getElementById('fuel-type').addEventListener('change', updatePointsPreview);
+            document.getElementById('search-btn').addEventListener('click', searchCustomer);
+            document.getElementById('add-user-btn').addEventListener('click', showUserModal);
+            document.getElementById('user-form').addEventListener('submit', handleUserSave);
+            document.querySelectorAll('.close-modal').forEach(btn => {
+                btn.addEventListener('click', hideUserModal);
+            });
+
+            // Rellenar puntos por galón
+            document.getElementById('acpm-points').value = mockData.pointRules.acpm;
+            document.getElementById('corriente-points').value = mockData.pointRules.corriente;
+            document.getElementById('extra-points').value = mockData.pointRules.extra;
+
+            // Llenar tablas
+            updateDashboardStats();
+            loadRecentSales();
+            loadCustomersRanking();
+            loadUsers();
+        }
+
+        // Manejo de login
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const user = mockData.users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                loginScreen.style.display = 'none';
+                appContainer.style.display = 'flex';
+                
+                // Actualizar información del usuario
+                userName.textContent = user.name;
+                userRole.textContent = user.role === 'admin' ? 'Administrador' : 'Vendedor';
+                userAvatar.textContent = user.name.charAt(0);
+                
+                // Mostrar/ocultar secciones según el rol
+                if (user.role !== 'admin') {
+                    document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+                }
+                
+                changeSection('dashboard');
+            } else {
+                loginAlert.classList.remove('hide');
+                setTimeout(() => {
+                    loginAlert.classList.add('hide');
+                }, 3000);
+            }
+        }
+
+        // Manejo de logout
+        function handleLogout() {
+            currentUser = null;
+            loginScreen.style.display = 'flex';
+            appContainer.style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // Cambiar sección
+        function changeSection(section) {
+            // Actualizar navegación
+            navItems.forEach(item => {
+                if (item.getAttribute('data-section') === section) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            // Actualizar secciones
+            document.querySelectorAll('.section').forEach(s => {
+                if (s.id === section) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+
+            // Actualizar título
+            if (section === 'dashboard') sectionTitle.textContent = 'Dashboard';
+            else if (section === 'sales') sectionTitle.textContent = 'Registrar Venta';
+            else if (section === 'customers') sectionTitle.textContent = 'Consultar Cliente';
+            else if (section === 'ranking') sectionTitle.textContent = 'Ranking de Puntos';
+            else if (section === 'admin') sectionTitle.textContent = 'Administración';
+
+            currentSection = section;
+        }
+
+        // Actualizar estadísticas del dashboard
+        function updateDashboardStats() {
+            const today = new Date().toISOString().slice(0, 10);
+            const todaySales = mockData.sales.filter(sale => sale.date.startsWith(today));
+            
+            const stats = document.querySelectorAll('.stat-card p');
+            
+            // Ventas hoy
+            stats[0].textContent = todaySales.length;
+            
+            // Galones vendidos hoy
+            const gallons = todaySales.reduce((sum, sale) => sum + sale.quantity, 0);
+            stats[1].textContent = gallons.toFixed(1);
+            
+            // Puntos otorgados hoy
+            const points = todaySales.reduce((sum, sale) => sum + sale.points, 0);
+            stats[2].textContent = points;
+            
+            // Clientes nuevos (simulado)
+            stats[3].textContent = '2';
+        }
+
+        // Cargar ventas recientes
+        function loadRecentSales() {
+            const tbody = document.querySelector('#recent-sales tbody');
+            tbody.innerHTML = '';
+            
+            if (mockData.sales.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="6" style="text-align: center;">No hay ventas recientes</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+            
+            // Ordenar por fecha (más recientes primero)
+            const sortedSales = [...mockData.sales].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            sortedSales.forEach(sale => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${formatDateTime(sale.date)}</td>
+                    <td>${sale.customerName}</td>
+                    <td>${formatFuelType(sale.fuelType)}</td>
+                    <td>${sale.quantity} gal</td>
+                    <td>${sale.points}</td>
+                    <td>${sale.seller}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Actualizar vista previa de puntos
+        function updatePointsPreview() {
+            const fuelType = document.getElementById('fuel-type').value;
+            const quantity = parseFloat(document.getElementById('fuel-quantity').value) || 0;
+            const pointsPreview = document.getElementById('points-preview');
+            
+            if (!fuelType) {
+                pointsPreview.textContent = '0';
+                return;
+            }
+            
+            const pointsPerGallon = mockData.pointRules[fuelType];
+            const totalPoints = Math.floor(quantity * pointsPerGallon);
+            pointsPreview.textContent = totalPoints;
+        }
+
+        // Manejar envío de venta
+        function handleSaleSubmit(event) {
+            event.preventDefault();
+            const customerId = document.getElementById('customer-id').value;
+            const customerName = document.getElementById('customer-name').value;
+            const fuelType = document.getElementById('fuel-type').value;
+            const quantity = parseFloat(document.getElementById('fuel-quantity').value);
+            const saleDate = document.getElementById('sale-date').value;
+            
+            // Calcular puntos
+            const pointsPerGallon = mockData.pointRules[fuelType];
+            const points = Math.floor(quantity * pointsPerGallon);
+            
+            // Crear nueva venta
+            const newSale = {
+                id: mockData.sales.length + 1,
+                date: saleDate.replace('T', ' ') + ':00',
+                customerId,
+                customerName,
+                fuelType,
+                quantity,
+                points,
+                seller: currentUser.name
+            };
+            
+            // Actualizar cliente o crear si no existe
+            let customer = mockData.customers.find(c => c.id === customerId);
+            if (customer) {
+                customer.points += points;
+                customer.totalPurchases += 1;
+                customer.totalGallons += quantity;
+                customer.lastPurchase = saleDate.split('T')[0];
+            } else {
+                mockData.customers.push({
+                    id: customerId,
+                    name: customerName,
+                    points: points,
+                    totalPurchases: 1,
+                    totalGallons: quantity,
+                    lastPurchase: saleDate.split('T')[0]
+                });
+            }
+            
+            // Agregar venta al mock data
+            mockData.sales.push(newSale);
+            
+            // Actualizar UI
+            updateDashboardStats();
+            loadRecentSales();
+            loadCustomersRanking();
+            
+            // Mostrar mensaje de éxito
+            const saleAlert = document.getElementById('sale-alert');
+            saleAlert.textContent = '¡Venta registrada exitosamente!';
+            saleAlert.className = 'alert alert-success';
+            saleAlert.classList.remove('hide');
+            
+            // Limpiar formulario
+            document.getElementById('sale-form').reset();
+            document.getElementById('points-preview').textContent = '0';
+            
+            // Configurar fecha actual
+            const now = new Date();
+            const dateTimeLocal = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById('sale-date').value = dateTimeLocal;
+            
+            // Ocultar mensaje después de un tiempo
+            setTimeout(() => {
+                saleAlert.classList.add('hide');
+            }, 3000);
+        }
+
+        // Buscar cliente
+        function searchCustomer() {
+            const customerId = document.getElementById('customer-search').value;
+            const customer = mockData.customers.find(c => c.id === customerId);
+            
+            const customerProfile = document.getElementById('customer-profile');
+            const customerNotFound = document.getElementById('customer-not-found');
+            
+            if (customer) {
+                // Mostrar perfil del cliente
+                customerProfile.classList.remove('hide');
+                customerNotFound.classList.add('hide');
+                
+                // Actualizar información
+                document.getElementById('profile-name').textContent = customer.name;
+                document.getElementById('profile-id').textContent = `Cédula/ID: ${customer.id}`;
+                document.getElementById('customer-avatar').textContent = customer.name.charAt(0);
+                document.getElementById('customer-total-points').textContent = customer.points;
+                document.getElementById('customer-total-purchases').textContent = customer.totalPurchases;
+                document.getElementById('customer-total-gallons').textContent = customer.totalGallons.toFixed(1);
+                document.getElementById('customer-last-purchase').textContent = formatDate(customer.lastPurchase);
+                
+                // Cargar transacciones del cliente
+                loadCustomerTransactions(customer.id);
+                
+                // Cargar historial de puntos del cliente (simulado)
+                loadCustomerPointsHistory(customer.id);
+            } else {
+                customerProfile.classList.add('hide');
+                customerNotFound.classList.remove('hide');
+            }
+        }
+
+        // Cargar transacciones del cliente
+        function loadCustomerTransactions(customerId) {
+            const tbody = document.querySelector('#customer-transactions tbody');
+            tbody.innerHTML = '';
+            
+            const customerSales = mockData.sales.filter(sale => sale.customerId === customerId);
+            
+            if (customerSales.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="5" style="text-align: center;">No hay transacciones registradas</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+            
+            // Ordenar por fecha (más recientes primero)
+            const sortedSales = [...customerSales].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            sortedSales.forEach(sale => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${formatDateTime(sale.date)}</td>
+                    <td>${formatFuelType(sale.fuelType)}</td>
+                    <td>${sale.quantity} gal</td>
+                    <td>${sale.points}</td>
+                    <td>${sale.seller}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Cargar historial de puntos del cliente (simulado)
+        function loadCustomerPointsHistory(customerId) {
+            const tbody = document.querySelector('#customer-points-history tbody');
+            tbody.innerHTML = '';
+            
+            const customerSales = mockData.sales.filter(sale => sale.customerId === customerId);
+            
+            if (customerSales.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="4" style="text-align: center;">No hay historial de puntos</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+            
+            // Ordenar por fecha (más recientes primero)
+            const sortedSales = [...customerSales].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            let balance = 0;
+            
+            // Calcular balance final
+            for (const sale of customerSales) {
+                balance += sale.points;
+            }
+            
+            sortedSales.forEach(sale => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${formatDateTime(sale.date)}</td>
+                    <td>Compra de ${sale.quantity} gal. de ${formatFuelType(sale.fuelType)}</td>
+                    <td>+${sale.points}</td>
+                    <td>${balance}</td>
+                `;
+                balance -= sale.points;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Cargar ranking de clientes
+        function loadCustomersRanking() {
+            const tbody = document.querySelector('#customers-ranking tbody');
+            tbody.innerHTML = '';
+            
+            if (mockData.customers.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="6" style="text-align: center;">No hay clientes registrados</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+            
+            // Ordenar por puntos (mayor a menor)
+            const sortedCustomers = [...mockData.customers].sort((a, b) => b.points - a.points);
+            
+            sortedCustomers.forEach((customer, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${customer.name}</td>
+                    <td>${customer.id}</td>
+                    <td>${customer.points}</td>
+                    <td>${customer.totalGallons.toFixed(1)}</td>
+                    <td>${customer.totalPurchases}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Guardar reglas de puntos
+        function handleRulesSave(event) {
+            event.preventDefault();
+            const acpmPoints = parseFloat(document.getElementById('acpm-points').value);
+            const corrientePoints = parseFloat(document.getElementById('corriente-points').value);
+            const extraPoints = parseFloat(document.getElementById('extra-points').value);
+            
+            mockData.pointRules = {
+                acpm: acpmPoints,
+                corriente: corrientePoints,
+                extra: extraPoints
+            };
+            
+            // Mostrar mensaje de éxito
+            const rulesAlert = document.getElementById('rules-alert');
+            rulesAlert.textContent = 'Configuración guardada exitosamente.';
+            rulesAlert.className = 'alert alert-success';
+            rulesAlert.classList.remove('hide');
+            
+            // Ocultar mensaje después de un tiempo
+            setTimeout(() => {
+                rulesAlert.classList.add('hide');
+            }, 3000);
+        }
+
+        // Cargar usuarios
+        function loadUsers() {
+            const tbody = document.querySelector('#users-table tbody');
+            tbody.innerHTML = '';
+            
+            if (mockData.users.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="6" style="text-align: center;">No hay usuarios registrados</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+            
+            mockData.users.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.name}</td>
+                    <td>${user.username}</td>
+                    <td>${user.role === 'admin' ? 'Administrador' : 'Vendedor'}</td>
+                    <td>${formatDateTime(user.lastLogin)}</td>
+                    <td><span class="badge badge-${user.status === 'active' ? 'success' : 'danger'}">${user.status === 'active' ? 'Activo' : 'Inactivo'}</span></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm edit-user" data-id="${user.id}">Editar</button>
+                        <button class="btn btn-danger btn-sm delete-user" data-id="${user.id}">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            // Agregar event listeners para editar/eliminar
+            document.querySelectorAll('.edit-user').forEach(btn => {
+                btn.addEventListener('click', () => editUser(parseInt(btn.getAttribute('data-id'))));
+            });
+            
+            document.querySelectorAll('.delete-user').forEach(btn => {
+                btn.addEventListener('click', () => deleteUser(parseInt(btn.getAttribute('data-id'))));
+            });
+        }
+
+        // Mostrar modal de usuario
+        function showUserModal() {
+            document.getElementById('modal-title').textContent = 'Nuevo Usuario';
+            document.getElementById('user-form').reset();
+            document.getElementById('user-form').setAttribute('data-mode', 'add');
+            document.getElementById('user-modal').classList.remove('hide');
+        }
+
+        // Ocultar modal de usuario
+        function hideUserModal() {
+            document.getElementById('user-modal').classList.add('hide');
+        }
+
+        // Editar usuario
+        function editUser(userId) {
+            const user = mockData.users.find(u => u.id === userId);
+            if (!user) return;
+            
+            document.getElementById('modal-title').textContent = 'Editar Usuario';
+            document.getElementById('user-name').value = user.name;
+            document.getElementById('user-username').value = user.username;
+            document.getElementById('user-role').value = user.role;
+            document.getElementById('user-status').value = user.status;
+            
+            document.getElementById('user-form').setAttribute('data-mode', 'edit');
+            document.getElementById('user-form').setAttribute('data-id', userId);
+            
+            document.getElementById('user-modal').classList.remove('hide');
+        }
+
+        // Eliminar usuario
+        function deleteUser(userId) {
+            if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+                const index = mockData.users.findIndex(u => u.id === userId);
+                if (index !== -1) {
+                    mockData.users.splice(index, 1);
+                    loadUsers();
+                }
+            }
+        }
+
+        // Manejar guardar usuario
+        function handleUserSave(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('user-name').value;
+            const username = document.getElementById('user-username').value;
+            const password = document.getElementById('user-password').value;
+            const role = document.getElementById('user-role').value;
+            const status = document.getElementById('user-status').value;
+            
+            const mode = event.target.getAttribute('data-mode');
+            
+            if (mode === 'add') {
+                // Verificar que el usuario no exista
+                if (mockData.users.find(u => u.username === username)) {
+                    const alert = document.getElementById('user-form-alert');
+                    alert.textContent = 'El nombre de usuario ya existe.';
+                    alert.className = 'alert alert-danger';
+                    alert.classList.remove('hide');
+                    
+                    setTimeout(() => {
+                        alert.classList.add('hide');
+                    }, 3000);
+                    
+                    return;
+                }
+                
+                // Crear nuevo usuario
+                const newUser = {
+                    id: mockData.users.length + 1,
+                    name,
+                    username,
+                    password: password || 'password123',
+                    role,
+                    status,
+                    lastLogin: 'N/A'
+                };
+                
+                mockData.users.push(newUser);
+            } else if (mode === 'edit') {
+                const userId = parseInt(event.target.getAttribute('data-id'));
+                const user = mockData.users.find(u => u.id === userId);
+                
+                if (user) {
+                    user.name = name;
+                    user.username = username;
+                    if (password) {
+                        user.password = password;
+                    }
+                    user.role = role;
+                    user.status = status;
+                }
+            }
+            
+            // Actualizar UI
+            loadUsers();
+            hideUserModal();
+        }
+
+        // Utilidades
+        function formatDateTime(dateTimeStr) {
+            if (!dateTimeStr) return '-';
+            const date = new Date(dateTimeStr);
+            return date.toLocaleString();
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString();
+        }
+
+        function formatFuelType(type) {
+            if (type === 'acpm') return 'ACPM (Diésel)';
+            if (type === 'corriente') return 'Gasolina Corriente';
+            if (type === 'extra') return 'Gasolina Extra';
+            return type;
+        }
+    </script>
+</body>
+</html>
